@@ -19,11 +19,11 @@
     "vue",
     "utils"
   ],
-  "main": "index.js",
   "exports": {
-     ".": "./index.js",
-     "./*": "./*"
-   },
+    ".": "./index.js",
+    "./*": "./*"
+  },
+  "main": "index.js",
   "scripts": {
     "dev": "tsup --watch",
     "build": "tsup",
@@ -31,12 +31,19 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest"
   },
+  "peerDependencies": {
+    "vue": ">=3.0.0"
+  },
+  "dependencies": {
+    "@vueuse/core": "^11.2.0"
+  },
   "devDependencies": {
     "@antfu/eslint-config": "^3.8.0",
     "@types/node": "^22.8.6",
     "eslint": "^9.13.0",
     "tsup": "^8.3.5",
     "typescript": "^5.6.3",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.4",
+    "vue": "^3.5.12"
   }
 }
