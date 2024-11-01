@@ -1,0 +1,42 @@
+{
+  "name": "@tmg0/vueuse-extra",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "Vue composition utilities that aren't included in the vueuse",
+  "author": "tmg0",
+  "license": "MIT",
+  "homepage": "https://github.com/tmg0/vueuse-extra#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tmg0/vueuse-extra.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tmg0/vueuse-extra/issues"
+  },
+  "keywords": [
+    "vueuse",
+    "composition",
+    "vue",
+    "utils"
+  ],
+  "main": "index.js",
+  "exports": {
+     ".": "./index.js",
+     "./*": "./*"
+   },
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@antfu/eslint-config": "^3.8.0",
+    "@types/node": "^22.8.6",
+    "eslint": "^9.13.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}
