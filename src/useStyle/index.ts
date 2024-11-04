@@ -1,7 +1,7 @@
 import type { PermissiveTarget } from '../types'
 import { tryOnMounted, tryOnUnmounted } from '@vueuse/core'
 import { destr } from 'destr'
-import { computed, ref, unref } from 'vue'
+import { computed, ref, toRef, unref } from 'vue'
 
 type Transform = Record<string, string | number | (string | number)[]>
 
@@ -18,15 +18,15 @@ const TRANSFORM_RE = /(\w+)\(([-\s,.%\w]+)\)/g
 
 function useTransform(target: PermissiveTarget) {
   return computed(() => {
-    const transform: Transform = { scaleX: 1, scaleY: 1 }
+    const transform: Transform = {}
 
-    const elt = unref(target) as HTMLElement | undefined
+    const dom = unref(target) as HTMLElement | undefined
 
-    if (!elt) {
+    if (!dom) {
       return transform
     }
 
-    const value = (elt.style.transform ?? '').trim()
+    const value = (dom.style.transform ?? '').trim()
 
     const matches = value.matchAll(TRANSFORM_RE)
     for (const match of matches) {
@@ -42,11 +42,11 @@ function useTransform(target: PermissiveTarget) {
 export function useStyle(target: PermissiveTarget, options: UseStyleOptions = {}) {
   let observer: MutationObserver
 
-  const elt = computed(() => unref(target) as HTMLElement | undefined)
+  const domRef = toRef(target)
   const transform = ref<Partial<Transform>>({})
 
-  if (elt.value)
-    transform.value = useTransform(elt).value
+  if (domRef.value)
+    transform.value = useTransform(domRef).value
 
   tryOnMounted(() => {
     if (options.lazy)
@@ -58,10 +58,10 @@ export function useStyle(target: PermissiveTarget, options: UseStyleOptions = {}
       })
     })
 
-    if (!elt.value)
+    if (!domRef.value)
       return
 
-    observer.observe(elt.value as Node, {
+    observer.observe(domRef.value as Node, {
       attributes: true,
       attributeFilter: ['style'],
     })

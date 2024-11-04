@@ -1,1 +1,2 @@
-export * from './useStyle'
+export { useComputedStyle } from './useComputedStyle'
+export { useStyle } from './useStyle'
