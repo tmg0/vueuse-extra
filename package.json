@@ -1,7 +1,7 @@
 {
   "name": "@tmg0/vueuse-extra",
   "type": "module",
-  "version": "0.0.2-alpha.1",
+  "version": "0.0.2-alpha.2",
   "description": "Vue composition utilities that aren't included in the vueuse",
   "author": "tmg0",
   "license": "MIT",
@@ -23,6 +23,9 @@
     ".": "./dist/index.js",
     "./*": "./dist/*"
   },
+  "files": [
+    "dist"
+  ],
   "main": "./dist/index.js",
   "scripts": {
     "dev": "tsup --watch",
