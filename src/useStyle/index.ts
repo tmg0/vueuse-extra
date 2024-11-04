@@ -1,56 +1,67 @@
 import type { PermissiveTarget } from '../types'
 import { tryOnMounted, tryOnUnmounted } from '@vueuse/core'
-import { ref, unref } from 'vue'
+import { destr } from 'destr'
+import { computed, ref, unref } from 'vue'
 
-interface Transform {
-  translateX: number
-  translateY: number
-  translateZ: number
-  scaleX: number
-  scaleY: number
+type Transform = Record<string, string | number | (string | number)[]>
+
+export interface UseStyleOptions {
+  lazy?: boolean
+  immediate?: boolean
 }
 
 export interface UseStyleReturn {
   transform: Transform
 }
 
-function parseTransform(value: string) {
-  const translate3dMatch = /translate3d\(([^)]+)\)/.exec(value)
-  const scaleXMatch = /scaleX\(([\d.]+)\)/.exec(value)
-  const scaleYMatch = /scaleY\(([\d.]+)\)/.exec(value)
+const TRANSFORM_RE = /(\w+)\(([-\s,.%\w]+)\)/g
 
-  const [x, y, z] = translate3dMatch
-    ? translate3dMatch[1].split(',').map(val => Number.parseFloat(val))
-    : [0, 0, 0]
+function useTransform(target: PermissiveTarget) {
+  return computed(() => {
+    const transform: Transform = { scaleX: 1, scaleY: 1 }
 
-  return {
-    translateX: x,
-    translateY: y,
-    translateZ: z,
-    scaleX: scaleXMatch ? Number.parseFloat(scaleXMatch[1]) : 1,
-    scaleY: scaleYMatch ? Number.parseFloat(scaleYMatch[1]) : 1,
-  }
+    const elt = unref(target) as HTMLElement | undefined
+
+    if (!elt) {
+      return transform
+    }
+
+    const value = (elt.style.transform ?? '').trim()
+
+    const matches = value.matchAll(TRANSFORM_RE)
+    for (const match of matches) {
+      const [_, f, a] = match
+      const args = a.split(',').map(i => destr<string | number>(i.trim()))
+      transform[f] = args.length > 1 ? args : args[0]
+    }
+
+    return transform
+  })
 }
 
-export function useStyle(target: PermissiveTarget) {
+export function useStyle(target: PermissiveTarget, options: UseStyleOptions = {}) {
   let observer: MutationObserver
 
+  const elt = computed(() => unref(target) as HTMLElement | undefined)
   const transform = ref<Partial<Transform>>({})
 
+  if (elt.value)
+    transform.value = useTransform(elt).value
+
   tryOnMounted(() => {
+    if (options.lazy)
+      return
+
     observer = new MutationObserver((mutations) => {
       mutations.forEach((m) => {
-        const { style } = m.target as HTMLElement
-        transform.value = parseTransform(style.transform ?? '')
+        transform.value = useTransform(m.target as HTMLElement).value
       })
     })
 
-    const elt = unref(target)
-
-    if (!elt)
+    if (!elt.value)
       return
 
-    observer.observe(elt as Node, {
+    observer.observe(elt.value as Node, {
       attributes: true,
       attributeFilter: ['style'],
     })
