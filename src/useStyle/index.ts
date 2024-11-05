@@ -1,5 +1,5 @@
 import type { PermissiveTarget } from '../types'
-import { tryOnMounted, tryOnUnmounted } from '@vueuse/core'
+import { tryOnUnmounted, watchImmediate } from '@vueuse/core'
 import { destr } from 'destr'
 import { computed, ref, toRef, unref } from 'vue'
 
@@ -48,7 +48,14 @@ export function useStyle(target: PermissiveTarget, options: UseStyleOptions = {}
   if (domRef.value)
     transform.value = useTransform(domRef).value
 
-  tryOnMounted(() => {
+  tryOnUnmounted(cleanup)
+
+  watchImmediate(domRef, () => {
+    cleanup()
+    setup()
+  })
+
+  function setup() {
     if (options.lazy)
       return
 
@@ -65,11 +72,11 @@ export function useStyle(target: PermissiveTarget, options: UseStyleOptions = {}
       attributes: true,
       attributeFilter: ['style'],
     })
-  })
+  }
 
-  tryOnUnmounted(() => {
+  function cleanup() {
     observer?.disconnect()
-  })
+  }
 
   return {
     transform,
